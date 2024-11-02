@@ -36,12 +36,26 @@ jobs:
           host: ${{ secrets.AWS_EC2_HOST }}
           username: ${{ secrets.AWS_EC2_USER }}
           key: ${{ secrets.AWS_SSH_KEY }}
+          env:
+            RDS_HOST: ${{ secrets.RDS_HOST }}
+            RDS_PORT: ${{ secrets.RDS_PORT }}
+            RDS_DB_NAME: ${{ secrets.RDS_DB_NAME }}
+            RDS_USERNAME: ${{ secrets.RDS_USERNAME }}
+            RDS_PASSWORD: ${{ secrets.RDS_PASSWORD }}
           script: |
+            # 현재 실행 중인 애플리케이션 종료
             PID=$(pgrep -f 'java -jar' || true)
             if [ -n "$PID" ]; then
               kill -9 $PID
             fi
+
+            # JAR 파일 업로드 및 실행
             rm -rf app || true
             mkdir app
             scp -o StrictHostKeyChecking=no -r build/libs/*.jar ${{ secrets.AWS_EC2_USER }}@${{ secrets.AWS_EC2_HOST }}:~/app/app.jar
-            nohup java -jar ~/app/app.jar > /dev/null 2>&1 &
+
+            # 환경 변수로 RDS 설정을 전달하며 애플리케이션 실행
+            nohup java -jar ~/app/app.jar \
+              --spring.datasource.url=jdbc:mysql://${RDS_HOST}:${RDS_PORT}/${RDS_DB_NAME} \
+              --spring.datasource.username=${RDS_USERNAME} \
+              --spring.datasource.password=${RDS_PASSWORD} > /dev/null 2>&1 &
