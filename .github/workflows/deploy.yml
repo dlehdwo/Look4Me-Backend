@@ -1,0 +1,47 @@
+name: Deploy Spring Boot to AWS EC2
+
+on:
+  push:
+    branches:
+      - main  # main 브랜치에 push할 때 트리거
+  pull_request:
+    branches:
+      - main  # main 브랜치에 PR이 머지될 때 트리거
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 리포지토리 체크아웃
+      - name: Check out the code
+        uses: actions/checkout@v2
+
+      # 2. JDK 17 설치
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'  # 설치할 Java 버전
+          distribution: 'temurin'  # Temurin 배포판 사용
+          cache: gradle  # Gradle 캐시 활성화로 빌드 속도 개선
+
+      # 3. Gradle 빌드
+      - name: Build with Gradle
+        run: ./gradlew clean build
+
+      # 4. EC2 서버에 SSH로 연결하여 배포
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.AWS_EC2_HOST }}
+          username: ${{ secrets.AWS_EC2_USER }}
+          key: ${{ secrets.AWS_SSH_KEY }}
+          script: |
+            PID=$(pgrep -f 'java -jar' || true)
+            if [ -n "$PID" ]; then
+              kill -9 $PID
+            fi
+            rm -rf app || true
+            mkdir app
+            scp -o StrictHostKeyChecking=no -r build/libs/*.jar ${{ secrets.AWS_EC2_USER }}@${{ secrets.AWS_EC2_HOST }}:~/app/app.jar
+            nohup java -jar ~/app/app.jar > /dev/null 2>&1 &
