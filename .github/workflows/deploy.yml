@@ -49,7 +49,7 @@ jobs:
             scp -o StrictHostKeyChecking=no -r build/libs/*.jar ${{ secrets.AWS_EC2_USER }}@${{ secrets.AWS_EC2_HOST }}:~/app/app.jar
 
             # 환경 변수로 RDS 설정을 전달하며 애플리케이션 실행
-            nohup java -jar ~/app/app.jar \
-              --spring.datasource.url=jdbc:mysql://${RDS_HOST}:${RDS_PORT}/${RDS_DB_NAME} \
-              --spring.datasource.username=${RDS_USERNAME} \
-              --spring.datasource.password=${RDS_PASSWORD} > /dev/null 2>&1 &
+            nohup java -Xmx512m -jar ~/app/app.jar \
+            --spring.datasource.url=jdbc:mysql://${RDS_HOST}:${RDS_PORT}/${RDS_DB_NAME} \
+            --spring.datasource.username=${RDS_USERNAME} \
+            --spring.datasource.password=${RDS_PASSWORD} > /dev/null 2>&1 &
