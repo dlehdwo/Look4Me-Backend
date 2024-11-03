@@ -36,13 +36,6 @@ jobs:
           host: ${{ secrets.AWS_EC2_HOST }}
           username: ${{ secrets.AWS_EC2_USER }}
           key: ${{ secrets.AWS_SSH_KEY }}
-          env:
-            RDS_HOST: ${{ secrets.RDS_HOST }}
-            RDS_PORT: ${{ secrets.RDS_PORT }}
-            RDS_DB_NAME: ${{ secrets.RDS_DB_NAME }}
-            RDS_USERNAME: ${{ secrets.RDS_USERNAME }}
-            RDS_PASSWORD: ${{ secrets.RDS_PASSWORD }}
-            JWT_KET: ${{ secrets.JWT_KEY }}
           script: |
             # 현재 실행 중인 애플리케이션 종료
             PID=$(pgrep -f 'java -jar' || true)
