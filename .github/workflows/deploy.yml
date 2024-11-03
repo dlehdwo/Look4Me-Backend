@@ -27,8 +27,8 @@ jobs:
 
       # 3. Gradle 빌드
       - name: Build with Gradle
-        run: ./backend/gradlew clean bootjar
-
+        run: cd ./backend && ./gradlew clean bootjar
+        
       # 4. EC2 서버에 SSH로 연결하여 배포
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.6
@@ -46,7 +46,7 @@ jobs:
             # JAR 파일 업로드 및 실행
             rm -rf app || true
             mkdir app
-            scp -o StrictHostKeyChecking=no -r backend/build/libs/*.jar ${{ secrets.AWS_EC2_USER }}@${{ secrets.AWS_EC2_HOST }}:~/app/app.jar
+            scp -o StrictHostKeyChecking=no -r build/libs/*.jar ${{ secrets.AWS_EC2_USER }}@${{ secrets.AWS_EC2_HOST }}:~/app/app.jar
 
             # 환경 변수로 RDS 설정을 전달하며 애플리케이션 실행
             nohup java -jar ~/app/app.jar \
