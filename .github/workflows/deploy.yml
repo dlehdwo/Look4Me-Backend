@@ -42,6 +42,7 @@ jobs:
             RDS_DB_NAME: ${{ secrets.RDS_DB_NAME }}
             RDS_USERNAME: ${{ secrets.RDS_USERNAME }}
             RDS_PASSWORD: ${{ secrets.RDS_PASSWORD }}
+            JWT_KET: ${{ secrets.JWT_KEY }}
           script: |
             # 현재 실행 중인 애플리케이션 종료
             PID=$(pgrep -f 'java -jar' || true)
